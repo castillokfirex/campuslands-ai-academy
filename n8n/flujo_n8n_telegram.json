@@ -1,0 +1,144 @@
+{
+  "name": "Campuslands AI Academy - Registro y Aviso Telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-academy-registro",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "b8c4e1a0-1001-4a00-9000-000000000001",
+      "name": "Webhook Registro Landing",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "ai-academy-registro"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-nombre",
+              "leftValue": "={{ $json.body.nombre }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "cond-correo",
+              "leftValue": "={{ $json.body.correo }}",
+              "rightValue": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "id": "cond-programa",
+              "leftValue": "={{ $json.body.programa }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b8c4e1a0-1002-4a00-9000-000000000002",
+      "name": "Validar Campos Obligatorios",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $input.first().json.body ?? $input.first().json;\nconst esc = (val) => String(val ?? '')\n  .replace(/&/g, '&amp;')\n  .replace(/</g, '&lt;')\n  .replace(/>/g, '&gt;');\n\nconst fecha = payload.fecha\n  ? new Date(payload.fecha).toLocaleString('es-CO', { timeZone: 'America/Bogota' })\n  : new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });\n\nconst lines = [\n  '<b>Nueva solicitud en Campuslands AI Academy</b>',\n  '',\n  `<b>Nombre:</b> ${esc(payload.nombre)}`,\n  `<b>Correo:</b> ${esc(payload.correo)}`,\n  `<b>Programa:</b> ${esc(payload.programa)}`,\n];\n\nif (payload.telefono && String(payload.telefono).trim().length > 0) {\n  lines.push(`<b>Teléfono:</b> ${esc(payload.telefono)}`);\n}\n\nlines.push(`<b>Estado:</b> ${esc(payload.estado || 'Nuevo')}`);\nlines.push(`<b>Fecha:</b> ${esc(fecha)}`);\n\nreturn [{ json: { telegramText: lines.join('\\n'), lead: payload } }];"
+      },
+      "id": "b8c4e1a0-1003-4a00-9000-000000000003",
+      "name": "Formatear Mensaje Telegram",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [760, 220]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "={{ $json.telegramText }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "b8c4e1a0-1004-4a00-9000-000000000004",
+      "name": "Enviar Aviso Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1020, 220],
+      "credentials": {
+        "telegramApi": {
+          "id": "CONFIGURAR_CREDENCIAL_TELEGRAM",
+          "name": "Telegram Bot AI Academy (Configurar en n8n)"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Registro Landing": {
+      "main": [
+        [
+          {
+            "node": "Validar Campos Obligatorios",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Campos Obligatorios": {
+      "main": [
+        [
+          {
+            "node": "Formatear Mensaje Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Formatear Mensaje Telegram": {
+      "main": [
+        [
+          {
+            "node": "Enviar Aviso Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1.0.0",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

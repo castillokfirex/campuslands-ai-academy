@@ -1,26 +1,85 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-poppins), sans-serif;
+  --font-mono: var(--font-poppins), sans-serif;
+  --color-brand-black: #050507;
+  --color-brand-evox: #7026e8;
+  --color-brand-electric: #9636ff;
+  --color-brand-soft: #b783ff;
+  --color-brand-muted: #8e8998;
+  --color-brand-body: #dcd6ea;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  font-family: var(--font-poppins), sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #050507;
+  color: #dcd6ea;
+  font-family: var(--font-poppins), sans-serif;
+}
+
+.brand-card {
+  background-color: rgba(183, 131, 255, 0.08);
+  border: 1px solid rgba(183, 131, 255, 0.16);
+  border-radius: 28px;
+}
+
+.brand-pill-tag {
+  background-color: #b783ff;
+  color: #050507;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-radius: 9999px;
+}
+
+.halo-electric {
+  background: radial-gradient(
+    circle,
+    rgba(150, 54, 255, 0.34) 0%,
+    rgba(150, 54, 255, 0.08) 45%,
+    transparent 72%
+  );
+}
+
+.halo-evox {
+  background: radial-gradient(
+    circle,
+    rgba(112, 38, 232, 0.32) 0%,
+    rgba(112, 38, 232, 0.08) 45%,
+    transparent 72%
+  );
+}
+
+.reveal-section {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal-section[data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .reveal-section {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
